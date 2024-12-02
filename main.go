@@ -2,28 +2,23 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 
-	"github.com/Yandex-Practicum/final-project-encoding-go/encoding"
-	"github.com/Yandex-Practicum/final-project-encoding-go/utils"
+	"github.com/Yandex-Practicum/final-project-encoding-go/handlers"
+	"github.com/go-chi/chi/v5"
 )
 
-func Encode(data encoding.MyEncoder) error {
-	return data.Encoding()
-}
-
 func main() {
-	utils.CreateJSONFile()
-	utils.CreateYAMLFile()
+	r := chi.NewRouter()
 
-	jsonData := encoding.JSONData{FileInput: "jsonInput.json", FileOutput: "yamlOutput.yml"}
-	err := Encode(&jsonData)
-	if err != nil {
-		fmt.Printf("ошибка при перекодировании данных из JSON в YAML: %s", err.Error())
-	}
+	r.Get("/tasks", handlers.GetTasks)
+	r.Post("/tasks", handlers.AddTask)
+	r.Get("/tasks/{id}", handlers.GetTask)
+	r.Delete("/tasks/{id}", handlers.DeleteTask)
 
-	yamlData := encoding.YAMLData{FileInput: "yamlInput.yml", FileOutput: "jsonOutput.json"}
-	err = Encode(&yamlData)
-	if err != nil {
-		fmt.Printf("ошибка при перекодировании данных из YAML в JSON: %s", err.Error())
+	fmt.Println("Сервер запущен на порту 8080...")
+	if err := http.ListenAndServe(":8080", r); err != nil {
+		fmt.Printf("Ошибка при запуске сервера: %s", err.Error())
+		return
 	}
 }
